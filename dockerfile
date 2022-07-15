@@ -17,5 +17,4 @@ RUN rm -rf /etc/nginx/nginx.conf && \
     mv /tmp/src/htmlsite/action_page.php /etc/nginx/php && \
     echo "<?php phpinfo(); ?>" >> /etc/nginx/php/info.php
 
-
 EXPOSE 8089/tcp
