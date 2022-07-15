@@ -1,20 +1,23 @@
-FROM wyveo/nginx-php-fpm
+FROM centos/python-35-centos7:latest
 
 USER root
 
 COPY . /tmp/src
 
-RUN rm -rf /etc/nginx/nginx.conf && \
-    mkdir /etc/nginx/html && \
-    mkdir /etc/nginx/snippets && \
-    mkdir /etc/nginx/php && \
-    chown -R 1001 /tmp/src && \
-    chmod -R g+w /tmp/src && \
-    chmod -R 777 /etc/nginx/php && \
-    mv /tmp/src/nginx.conf /etc/nginx && \
-    mv /tmp/src/fastcgi-php.conf /etc/nginx/snippets && \
-    mv /tmp/src/htmlsite/site.html /etc/nginx/html && \
-    mv /tmp/src/htmlsite/action_page.php /etc/nginx/php && \
-    echo "<?php phpinfo(); ?>" >> /etc/nginx/php/info.php
+RUN mv /tmp/src/.s2i/bin /tmp/scripts
 
-EXPOSE 8089/tcp
+RUN rm -rf /tmp/src/.git* && \
+    chown -R 1001 /tmp/src && \
+    chgrp -R 0 /tmp/src && \
+    chmod -R g+w /tmp/src
+
+USER 1001
+
+ENV S2I_SCRIPTS_PATH=/usr/libexec/s2i \
+    S2I_BASH_ENV=/opt/app-root/etc/scl_enable \
+    DISABLE_COLLECTSTATIC=1 \
+    DISABLE_MIGRATE=1
+
+RUN /tmp/scripts/assemble
+
+CMD [ "/tmp/scripts/run" ]
